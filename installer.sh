@@ -85,23 +85,16 @@ WantedBy=multi-user.target
 EOF
 sudo systemctl enable device_manager.service
 
-# Step 7: Auto start bluetoothctl in discoverable mode
-sudo tee /etc/systemd/system/bluetooth-autostart.service <<EOF
-[Unit]
-Description=Auto Start Bluetooth in Discoverable Mode
-After=bluetooth.service
-
-[Service]
-ExecStart=/bin/bash -c 'while true; do bluetoothctl discoverable on; sleep 30; done'
-Restart=always
-User=root
-
-[Install]
-WantedBy=multi-user.target
+# Step 7: Auto-accept Bluetooth connections
+sudo tee /usr/bluepi/bt-agent.txt <<EOF
+power on
+agent on
+default-agent
+discoverable on
+pairable on
+pairing-notify no
 EOF
-sudo systemctl enable bluetooth-autostart.service
 
-# Step 8: Auto-accept Bluetooth connections
 sudo tee /etc/systemd/system/bluetooth-agent.service <<EOF
 [Unit]
 Description=Auto Accept Bluetooth Connections
