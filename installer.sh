@@ -88,11 +88,10 @@ sudo systemctl enable device_manager.service
 # Step 7: Auto-accept Bluetooth connections
 sudo tee /usr/bluepi/bt-agent.txt <<EOF
 power on
-agent on
-default-agent
 discoverable on
 pairable on
-pairing-notify no
+agent NoInputNoOutput
+default-agent 
 EOF
 
 sudo tee /etc/systemd/system/bluetooth-agent.service <<EOF
