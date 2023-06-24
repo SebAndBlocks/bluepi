@@ -16,13 +16,8 @@ sudo apt-get install bluez bluez-tools dnsmasq -y
 
 # Step 4: Configure PIN authentication
 echo "Step 4: Configure PIN authentication"
-PIN=""
-while [[ ! $PIN =~ ^[0-9]{4,6}$ ]]; do
-    echo -n "Enter a 4-6 digit PIN for pairing: "
-    PIN=$(echo -n && read -rs && echo "$REPLY")
-    echo
-done
-
+PIN=$(echo -n && read -rs && echo "$REPLY")
+echo
 # Rest of the script...
 
 # Step 6: The Portal
