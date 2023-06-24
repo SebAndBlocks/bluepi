@@ -3,12 +3,8 @@
 # Step 1: Pairing
 echo "Step 1: Pair your iPad with the Raspberry Pi"
 echo "Make sure Bluetooth is enabled on both devices."
-read -p "Press Enter to continue..." -n 1 -r <&0
 wget https://raw.githubusercontent.com/sebtnt/bluepi/main/bt.txt
 sudo bluetoothctl < bt.txt
-
-echo "Please go to your iPad and pair it with the Raspberry Pi."
-read -p "Press Enter to continue..." -n 1 -r <&0
 
 # Step 2: Configure Bluetooth PAN/DUN
 echo "Step 2: Configuring Bluetooth PAN/DUN on Raspberry Pi"
@@ -57,7 +53,11 @@ EOF
 
 # Step 4: Configure PIN authentication
 echo "Step 4: Configure PIN authentication"
-read -p "Enter a 4-6 digit PIN for pairing: " PIN
+PIN=""
+while [[ ! $PIN =~ ^[0-9]{4,6}$ ]]; do
+    echo -n "Enter a 4-6 digit PIN for pairing: "
+    read -r PIN
+done
 
 sudo sed -i "s/#auth/passkey-agent =\/usr\/bin\/passkey-agent --default-passkey $PIN/g" /etc/bluetooth/main.conf
 
