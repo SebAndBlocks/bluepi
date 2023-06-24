@@ -1,0 +1,3 @@
+discoverable on
+agent on
+default-agent
