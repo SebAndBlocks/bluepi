@@ -16,8 +16,11 @@ sudo apt-get install bluez bluez-tools dnsmasq -y
 
 # Step 4: Configure PIN authentication
 echo "Step 4: Configure PIN authentication"
+PIN="1234"
 PIN=$(echo -n && read -rs && echo "$REPLY")
 echo
+
+echo "PIN SET TO $PIN"
 # Rest of the script...
 
 # Step 6: The Portal
