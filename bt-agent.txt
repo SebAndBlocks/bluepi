@@ -1,3 +1,6 @@
-discoverable on
+power on
 agent on
 default-agent
+discoverable on
+pairable on
+pairing-notify no
