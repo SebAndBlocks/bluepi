@@ -3,6 +3,6 @@ BluePi - use your Pi 4 as an iPad / iPhone / Android Phone / Android Tablet addo
 ## Installer
 BluePi can be easily installed with one command:
 ```sh
-curl -sSL https://raw.githubusercontent.com/sebtnt/bluepi/main/installer.sh | bash
+sudo curl -sSL https://raw.githubusercontent.com/sebtnt/bluepi/main/installer.sh | sudo bash
 ```
 or by using Pi-Apps [COMING SOON]
