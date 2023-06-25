@@ -1,4 +1,2 @@
-[BluetoothAgent]
-Capability=KeyboardDisplay
-PasskeyAgent=/usr/bin/bluez-simple-agent
-PinCode="8296"
+agent KeyboardDisplay
+default-agent
