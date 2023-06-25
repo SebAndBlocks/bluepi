@@ -1,4 +1,4 @@
-# bluepi
+# BluePi
 BluePi - use your Pi 4 as an iPad / iPhone / Android Phone / Android Tablet addon using bluetooth (all devices with PAN/DUN are supported)
 ## Installer
 BluePi can be easily installed with one command:
