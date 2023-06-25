@@ -22,7 +22,7 @@ sudo tee /etc/systemd/network/pan0.network <<EOF
 Name=pan0
 
 [Network]
-Address=192.168.12.1/24
+Address=192.168.10.1/24
 DHCPServer=yes
 EOF
 
@@ -30,7 +30,7 @@ sudo systemctl restart systemd-networkd
 sudo systemctl enable systemd-networkd
 
 sudo sed -i 's/#interface=lo,eth0/interface=pan0/g' /etc/dnsmasq.conf
-sudo sed -i 's/^#dhcp-range=192.168.0.0,192.168.0.255,255.255.255.0,1h/dhcp-range=192.168.12.2,192.168.12.254,255.255.255.0,24h/g' /etc/dnsmasq.conf
+sudo sed -i 's/^#dhcp-range=192.168.0.0,192.168.0.255,255.255.255.0,1h/dhcp-range=192.168.10.2,192.168.10.254,255.255.255.0,24h/g' /etc/dnsmasq.conf
 sudo hciconfig hci0 name "MyBluePi"
 sudo systemctl restart bluetooth
 
@@ -39,9 +39,9 @@ echo "Step 3: Enabling IP forwarding and configuring NAT"
 sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 sudo sysctl -p
 
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-sudo iptables -A FORWARD -i eth0 -o pan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i pan0 -o eth0 -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+sudo iptables -A FORWARD -i wlan0 -o pan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i pan0 -o wlan0 -j ACCEPT
 
 sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 
@@ -51,18 +51,42 @@ iptables-restore < /etc/iptables.ipv4.nat
 exit 0
 EOF
 
-# Step 4: Configure PIN authentication (Removed)
+# Step 4: Configure Bluetooth agent
+echo "Step 4: Configure Bluetooth agent"
+
+PIN="8296"
+
+sudo tee /etc/systemd/system/bluetooth-agent.service <<EOF
+[Unit]
+Description=Auto Accept Bluetooth Connections
+Requires=bluetooth.service
+After=bluetooth.service
+
+[Service]
+ExecStart=/usr/bin/bluetooth-agent --adapter=hci0 --pairingagent --default-agent --capability=KeyboardOnly --name="MyBluePi" --passkey="$PIN"
+ExecStartPost=/usr/bin/bluetoothctl connect $(cat /usr/bluepi/bt-agent.txt)
+Type=simple
+Restart=on-failure
+RestartSec=5
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable bluetooth-agent.service
+
 
 # Step 5: Instructions
 echo "Step 5: Instructions"
 echo "Please go to your iPad and connect to the Raspberry Pi's Bluetooth PAN/DUN network."
-echo "The Raspberry Pi's IP address is 192.168.12.1, and other devices will be assigned IP addresses in the range 192.168.12.2 to 192.168.12.254."
+echo "The Raspberry Pi's IP address is 192.168.10.1, and other devices will be assigned IP addresses in the range 192.168.10.2 to 192.168.10.254."
 echo "The devices connected over PAN should now have access to the internet through the Raspberry Pi's internet connection."
 
 # Step 6: The Portal
 echo "Step 6: The Portal"
-echo "When Connected to the Pi over Bluetooth, you can connect to the Pi's website at 192.168.12.1:80 to manage the device"
-echo "As a restart is required, your Pi will finalize the setup and then restart as BluePi"
+echo "When connected to the Pi over Bluetooth, you can connect to the Pi's website at 192.168.10.1:80 to manage the device."
+echo "As a restart is required, your Pi will finalize the setup and then restart as BluePi."
 sudo apt-get update
 sudo apt-get install python3 python3-pip git -y
 pip3 install flask
@@ -74,7 +98,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 /usr/bluepi/manager/app.py
-WorkingDirectory=/usr/bluepi/manager/
+WorkingDirectory=/usr/bluepi/manager
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
@@ -84,30 +108,6 @@ User=root
 WantedBy=multi-user.target
 EOF
 sudo systemctl enable device_manager.service
-
-# Step 7: Auto-accept Bluetooth connections
-sudo tee /usr/bluepi/bt-agent.txt <<EOF
-power on
-discoverable on
-pairable on
-agent NoInputNoOutput
-default-agent 
-EOF
-
-sudo tee /etc/systemd/system/bluetooth-agent.service <<EOF
-[Unit]
-Description=Auto Accept Bluetooth Connections
-After=bluetooth.service
-
-[Service]
-ExecStart=/bin/bash -c 'bluetoothctl < /usr/bluepi/bt-agent.txt'
-Restart=always
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl enable bluetooth-agent.service
 
 echo "BluePi Setup Finished! Your Pi will now reboot."
 sudo reboot
