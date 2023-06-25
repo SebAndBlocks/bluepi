@@ -27,9 +27,16 @@ def bluetooth():
     if request.method == 'POST':
         name = request.form['name']
         pin = request.form['pin']
+
         subprocess.run(['sudo', 'hciconfig', 'hci0', 'name', name])
         subprocess.run(['sudo', 'sh', '-c', f"echo {pin} > /etc/bluetooth/pin.conf"])
-        subprocess.run(['sudo', 'systemctl', 'restart', 'bluetooth'])
+
+        # Update the Bluetooth agent configuration
+        subprocess.run(['sudo', 'systemctl', 'stop', 'bluetooth-agent'])
+        subprocess.run(['sudo', 'sed', '-i', f's/--name=.*/--name="{name}"/g', '/etc/systemd/system/bluetooth-agent.service'])
+        subprocess.run(['sudo', 'sed', '-i', f's/--passkey=.*/--passkey="{pin}"/g', '/etc/systemd/system/bluetooth-agent.service'])
+        subprocess.run(['sudo', 'systemctl', 'start', 'bluetooth-agent'])
+
         return redirect('/')
     else:
         return render_template('bluetooth.html')
