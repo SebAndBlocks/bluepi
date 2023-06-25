@@ -1,6 +1,4 @@
-power on
-agent on
-default-agent
-discoverable on
-pairable on
-pairing-notify no
+[BluetoothAgent]
+Capability=KeyboardDisplay
+PasskeyAgent=/usr/bin/bluez-simple-agent
+PinCode="8296"
