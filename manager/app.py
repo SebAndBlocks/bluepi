@@ -41,5 +41,16 @@ def bluetooth():
     else:
         return render_template('bluetooth.html')
 
+@app.route('/status')
+def status():
+    # Get device information
+    device_info = {}
+    device_info['name'] = subprocess.check_output(['hostname']).decode().strip()
+    device_info['bluetooth_connected'] = subprocess.check_output(['hcitool', 'con']).decode().strip() != ''
+    device_info['wifi_connected'] = subprocess.check_output(['iwgetid', '-r']).decode().strip() != ''
+    # Add more information as needed
+
+    return jsonify(device_info)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
