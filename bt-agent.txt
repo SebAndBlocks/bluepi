@@ -1,2 +1,3 @@
+discoverable on
 agent KeyboardDisplay
 default-agent
